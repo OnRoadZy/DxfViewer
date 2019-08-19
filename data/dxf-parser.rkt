@@ -2,8 +2,7 @@
 
 #lang racket
 
-(require "system-variable.rkt"
-         "structs.rkt")
+(require "structs.rkt")
 
 (define file-name "..//test//sample(2013)")
 (define file-suffix ".dxf")
@@ -102,6 +101,10 @@
       ;1071，32 位整数值：
       [(= v 1071) (string->number (cdr code))])))
 
+;定义二维点和三位点结构：
+(struct 2dp (x y))
+(struct 3dp (x y z))
+
 ;解析二维点：
 (define  (parse-2dp in)
   (let* ([1p (value-pair in)]
@@ -132,10 +135,13 @@
     (lambda (in)
       (parse-dxf in))))
 
-;测试：
+;测试解析结果：----------------
 (module+ test
   (load-dxf path)
-  system-var)
+  ;显示所有系统变量：
+  system-var
+  ;显示所有类：
+  classes)
 
 ;解析DXF文件内容：
 (define (parse-dxf in)
@@ -146,25 +152,33 @@
 
 ;解析SECTION段：
 (define (parse-section in)
-  (let ([code (value-pair in)])
-    (when (equal? (car code) "2")
-      (case (cdr code)
-        ;标题组码
-        [("HEADER") (parse-header in)]
-        ;类组码
-        [("CLASSES") void]
-        ;符号表组码
-        [("TABLES") void]
-        ;块组码
-        [("BLOCKS") void]
-        ;图元组码
-        [("ENTITIES") void]
-        ;对象组码
-        [("OBJECTS") void]))))
+  ;标题组码("HEADER")：
+  (parse-header in)
+  ;类组码("CLASSES")：
+  (parse-classes in)
+  ;符号表组码("TABLES")：
+  ;(parse-tables in)
+  ;块组码("BLOCKS")：
+  ;(parse-blocks in)
+  ;图元组码("ENTITIES")：
+  ;(parse-entities in)
+  ;对象组码("OBJECTS")：
+  ;(parse-objects in)
+  )
 
-;-----------------------------------------------
+;;解析标题组码（HEADER）：------------------------------------------
+;定义系统变量散列表：
+(define system-var (make-hash))
+
 ;解析标题组码（HEADER）：
 (define (parse-header in)
+  (let ([code (value-pair in)])
+    (when (and (equal? (car code) "2")
+               (equal? (cdr code) "HEADER"))
+      (parse-system-val in))))
+
+;解析系统变量：
+(define (parse-system-val in)
   (do ([code (value-pair in) (value-pair in)])
     ((and (string=? (car code) "0")
           (string=? (cdr code) "ENDSEC")) void)
@@ -189,11 +203,40 @@
                       (cdr code)
                       (parse-3dp in))]
           [else
-           (let ([value-code (value-pair in)])
-             (hash-set! system-var
-                        (cdr code)
-                        (parse-value value-code)))]))))
+           (hash-set! system-var
+                      (cdr code)
+                      (parse-value (value-pair in)))]))))
 
+;解析类组码（CLASSES）：-------------------------------------------------
+;定义类结构：
+(struct class (c1 c2 c3 c90 c280 c281))
+
+;定义类列表：
+(define classes '())
+
+;解析类组码（CLASSES）：
+(define (parse-classes in)
+  (do ([code (value-pair in) (value-pair in)])
+    ((and (equal? (car code) "0")
+          (equal? (cdr code) "ENDSEC")) void)
+    (when (and (equal? (car code) "0")
+               (equal? (cdr code) "CLASS"))
+      (parse-class in))))
+
+;解析类：
+(define (parse-class in)
+  (let ([c1 (value-pair in)]
+        [c2 (value-pair in)]
+        [c3 (value-pair in)]
+        [c90 (value-pair in)]
+        [c280 (value-pair in)]
+        [c281 (value-pair in)])
+    (set! classes
+          (cons
+           (class (cdr c1) (cdr c2) (cdr c3)
+             (cdr c90) (cdr c280) (cdr c281))
+           classes))))
+  
 ;-----------------------------------------------
 #|
 ;取得图元并分类获取数据：
