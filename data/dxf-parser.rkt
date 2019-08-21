@@ -2,8 +2,6 @@
 
 #lang racket
 
-(require "structs.rkt")
-
 (define file-name "..//test//sample(2013)")
 (define file-suffix ".dxf")
 (define path (string-append file-name file-suffix))
@@ -21,86 +19,87 @@
 (define (parse-value code)
   (let ([v (string->number (car code))])
     (cond
-      ;0-9，字符串（随着从 AutoCAD 2000 起引入了扩展符号名称，字数限制已由 255 个字符扩大到 2049 个单字节字符，不包括行末的换行符）：
-      [(and (>= v 0) (<= v 9)) (cdr code)]
-      ;10-39，双精度三维点值：
-      [(and (>= v 10) (<= v 39)) (string->number (cdr code))]
-      ;40-59，双精度浮点值：
-      [(and (>= v 40) (<= v 59)) (string->number (cdr code))]
-      ;60-79，16位整数值：
-      [(and (>= v 60) (<= v 79)) (string->number (cdr code))]
-      ;90-99，32位整数值：
-      [(and (>= v 90) (<= v 99)) (string->number (cdr code))]
-      ;100，字符串（最多 255 个字符；对于 Unicode 字符串，字符数要少一些）：
-      [(= v 100) (cdr code)]
-      ;102，字符串（最多 255 个字符；对于 Unicode 字符串，字符数要少一些）：
-      [(= v 102) (cdr code)]
-      ;105，表示16进制(hex)句柄值的字符串：????????????????????
-      [(= v 105) (cdr code)]
-      ;110-119，双精度浮点值：
-      [(and (>= v 110) (<= v 119)) (string->number (cdr code))]
-      ;120-129，双精度浮点值：
-      [(and (>= v 120) (<= v 129)) (string->number (cdr code))]
-      ;130-139，双精度浮点值：
-      [(and (>= v 130) (<= v 139)) (string->number (cdr code))]
-      ;140-149，双精度标量浮点值：
-      [(and (>= v 140) (<= v 149)) (string->number (cdr code))]
-      ;160-169，64位整数值：
-      [(and (>= v 160) (<= v 169)) (string->number (cdr code))]
-      ;170-179，16位整数值：
-      [(and (>= v 170) (<= v 179)) (string->number (cdr code))]
-      ;210-239，双精度浮点值：
-      [(and (>= v 210) (<= v 239)) (string->number (cdr code))]
-      ;270-279，16 位整数值：
-      [(and (>= v 270) (<= v 279)) (string->number (cdr code))]
-      ;280-289，16 位整数值：
-      [(and (>= v 280) (<= v 289)) (string->number (cdr code))]
+      
+      [(and
+        ;0-9，字符串（随着从 AutoCAD 2000 起引入了扩展符号名称，字数限制已由 255 个字符扩大到 2049 个单字节字符，不包括行末的换行符）：
+        (>= v 0) (<= v 9)
+        ;100，字符串（最多 255 个字符；对于 Unicode 字符串，字符数要少一些）：
+        ;102，字符串（最多 255 个字符；对于 Unicode 字符串，字符数要少一些）：
+        ;105，表示16进制(hex)句柄值的字符串：
+        ;999，注释（字符串）：
+        ;1071，32 位整数值：
+        (= v 100 102 105 999 1071)
+        ;300-309，任意字符串：
+        (>= v 300) (<= v 309)
+        ;310-319，表示二进制数据块的十六进制值的字符串：
+        (>= v 310) (<= v 319)
+        ;320-329，表示16进制句柄值的字符串：
+        (>= v 320) (<= v 329)
+        ;330-369，表示十六进制对象ID的字符串：
+        (>= v 330) (<= v 369)
+        ;390-399，表示 16 进制句柄值的字符串：
+        (>= v 380) (<= v 389)
+        ;410-419，字符串：
+        (>= v 410) (<= v 419)
+        ;430-439，字符串：
+        (>= v 430) (<= v 439)
+        ;470-479，字符串：
+        (>= v 470) (<= v 479)
+        ;480-481，表示 16 进制句柄值的字符串：
+        (>= v 480) (<= v 481)
+        ;1000-1009，字符串（与 0-9 代码范围的限制相同）：
+        (>= v 1000) (<= v 1009))
+       (cdr code)]
+      [(and
+        ;10-39，双精度三维点值：
+        (>= v 10) (<= v 39)
+            ;40-59，双精度浮点值：
+            (>= v 40) (<= v 59)
+            ;60-79，16位整数值：
+            (>= v 60) (<= v 79)
+            ;90-99，32位整数值：
+            (>= v 90) (<= v 99)
+            ;110-119，双精度浮点值：
+            (>= v 110) (<= v 119)
+            ;120-129，双精度浮点值：
+            (>= v 120) (<= v 129)
+            ;130-139，双精度浮点值：
+            (>= v 130) (<= v 139)
+            ;140-149，双精度标量浮点值：
+            (>= v 140) (<= v 149)
+            ;160-169，64位整数值：
+            (>= v 160) (<= v 169)
+            ;170-179，16位整数值：
+            (>= v 170) (<= v 179)
+            ;210-239，双精度浮点值：
+            (>= v 210) (<= v 239)
+            ;270-279，16 位整数值：
+            (>= v 270) (<= v 279)
+            ;280-289，16 位整数值：
+            (>= v 280) (<= v 289)
+            ;370-379，16 位整数值：
+            (>= v 370) (<= v 379)
+            ;380-389，16 位整数值：
+            (>= v 380) (<= v 389)
+            ;400-409，16 位整数值：
+            (>= v 380) (<= v 389)
+            ;420-429，32 位整数值：
+            (>= v 420) (<= v 429)
+            ;440-449，32 位整数值：
+            (>= v 440) (<= v 449)
+            ;450-459，长整数：
+            (>= v 450) (<= v 459)
+            ;460-469，双精度浮点值：
+            (>= v 460) (<= v 469)
+            ;1010-1059，双精度浮点值：
+            (>= v 1010) (<= v 1059)
+            ;1060-1070，16 位整数值：
+            (>= v 1060) (<= v 1070))
+       (string->number (cdr code))]
       ;290-299，布尔标志值：
       [(and (>= v 290) (<= v 299))
-       (if (equal? "0" (cdr code)) #f #t)]
-      ;300-309，任意字符串：
-      [(and (>= v 300) (<= v 309)) (cdr code)]
-      ;310-319，表示二进制数据块的十六进制值的字符串：
-      [(and (>= v 310) (<= v 319)) (cdr code)]
-      ;320-329，表示16进制句柄值的字符串：?????????????????
-      [(and (>= v 320) (<= v 329)) (cdr code)]
-      ;330-369，表示十六进制对象ID的字符串：?????????????????
-      [(and (>= v 330) (<= v 369)) (cdr code)]
-      ;370-379，16 位整数值：
-      [(and (>= v 370) (<= v 379)) (string->number (cdr code))]
-      ;380-389，16 位整数值：
-      [(and (>= v 380) (<= v 389)) (string->number (cdr code))]
-      ;390-399，表示 16 进制句柄值的字符串：
-      [(and (>= v 380) (<= v 389)) (cdr code)]
-      ;400-409，16 位整数值：
-      [(and (>= v 380) (<= v 389)) (string->number (cdr code))]
-      ;410-419，字符串：
-      [(and (>= v 410) (<= v 419)) (cdr code)]
-      ;420-429，32 位整数值：
-      [(and (>= v 420) (<= v 429)) (string->number (cdr code))]
-      ;430-439，字符串：
-      [(and (>= v 430) (<= v 439)) (cdr code)]
-      ;440-449，32 位整数值：
-      [(and (>= v 440) (<= v 449)) (string->number (cdr code))]
-      ;450-459，长整数：
-      [(and (>= v 450) (<= v 459)) (string->number (cdr code))]
-      ;460-469，双精度浮点值：
-      [(and (>= v 460) (<= v 469)) (string->number (cdr code))]
-      ;470-479，字符串：
-      [(and (>= v 470) (<= v 479)) (cdr code)]
-      ;480-481，表示 16 进制句柄值的字符串：
-      [(and (>= v 480) (<= v 481)) (cdr code)]
-      ;999，注释（字符串）：
-      [(= v 999) (cdr code)]
-      ;1000-1009，字符串（与 0-9 代码范围的限制相同）：
-      [(and (>= v 1000) (<= v 1009)) (cdr code)]
-      ;1010-1059，双精度浮点值：
-      [(and (>= v 1010) (<= v 1059)) (string->number (cdr code))]
-      ;1060-1070，16 位整数值：
-      [(and (>= v 1060) (<= v 1070)) (string->number (cdr code))]
-      ;1071，32 位整数值：
-      [(= v 1071) (string->number (cdr code))])))
-
+       (if (equal? "0" (cdr code)) #f #t)])))
+      
 ;定义二维点和三位点结构：
 (struct 2dp (x y))
 (struct 3dp (x y z))
@@ -153,16 +152,31 @@
 ;解析SECTION段：
 (define (parse-section in)
   ;标题组码("HEADER")：
-  (parse-header in)
+  (print "解析HEADER段……")
+  (let ([code (value-pair in)])
+    (when (and (equal? (car code) "2")
+               (equal? (cdr code) "HEADER"))
+      (parse-header in)))
   ;类组码("CLASSES")：
-  (parse-classes in)
+  (print "解析CLASSES段……")
+  (let ([code (value-pair in)])
+    (when (and (equal? (car code) "2")
+               (equal? (cdr code) "CLASSES"))
+      (parse-classes in)))
   ;符号表组码("TABLES")：
-  ;(parse-tables in)
+  (print "解析TABLES段……")
+  (let ([code (value-pair in)])
+    (when (and (equal? (car code) "2")
+               (equal? (cdr code) "TABLES"))
+      (parse-tables in)))
   ;块组码("BLOCKS")：
+  ;(print "解析BLOCKS段……")
   ;(parse-blocks in)
   ;图元组码("ENTITIES")：
+  ;(print "解析ENTITIES段……")
   ;(parse-entities in)
   ;对象组码("OBJECTS")：
+  ;(print "解析OBJECTS段……")
   ;(parse-objects in)
   )
 
@@ -236,7 +250,58 @@
            (class (cdr c1) (cdr c2) (cdr c3)
              (cdr c90) (cdr c280) (cdr c281))
            classes))))
-  
+
+;解析表组码（TABLES）：-------------------------------------------------
+;定义表列表：
+(define tables '())
+
+;定义符号表条目（TABLE）结构：
+(struct table (t2 t5/105 t100 t70 entries))
+
+;定义条目数据结构：
+(struct entry (e5 e100 datas))
+
+;解析表组码：
+(define (parse-tables in)
+  (do ([code (value-pair in) (value-pair in)])
+    ((and (equal? (car code) "0")
+          (equal? (cdr code) "ENDSEC")) void)
+    (when (and (equal? (car code) "0")
+               (equal? (cdr code) "TABLE"))
+      (set! tables
+            (cons (parse-table in) tables)))))
+
+;解析表：
+(define (parse-table in)
+  (let ([t2 (value-pair in)]
+        [t5/105 (value-pair in)]
+        [t100 (value-pair in)]
+        [t70 (value-pair in)])
+    (table (cdr t2) (cdr t5/105)
+           (cdr t100) (cdr t70)
+           (parse-entries in))))
+
+;解析条目：
+(define (parse-entries in)
+  ;APPID符号表条目：
+  (let ([code (value-pair in)])
+    (when (and (equal? (car code) "0")
+               (equal? (cdr code) "APPID"))
+      (parse-appid in)))
+  ;(parse-dimstyle in)
+  ;(parse-layer in)
+  ;(parse-ltype in)
+  ;(parse-style in)
+  ;(parse-ucs in)
+  ;(parse-view in)
+  ;(parse-vport in)
+  ;(parse-block_record in)
+  )
+
+;解析APPID符号表条目：
+(define (parse-appid in)
+  void)
+
 ;-----------------------------------------------
 #|
 ;取得图元并分类获取数据：
